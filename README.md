@@ -231,8 +231,8 @@ pillid-emergency/
 
 ## Team
 
-- **[Your Name]** - [LinkedIn](https://linkedin.com/in/yourprofile)
-- **[Team Member 2]** - [LinkedIn](https://linkedin.com/in/profile2)
+- **Kirtirajsinh Atodariya** - [LinkedIn]([https://www.linkedin.com/in/kirtirajsinhatodariya/])
+
 
 ---
 
