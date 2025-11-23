@@ -120,6 +120,8 @@ if img_file_buffer is not None:
             # 4. Triage Logic
             imprint = data.get("imprint_found", "None").upper().strip()
             confidence = data.get("confidence", 0)
+            detected_color = data.get("color", "Unknown")
+            detected_shape = data.get("shape", "Unknown")
 
             risk_level = "UNKNOWN"
             found_pill = None
@@ -171,7 +173,9 @@ if img_file_buffer is not None:
                 'found_pill': found_pill,
                 'imprint': imprint,
                 'confidence': confidence,
-                'user_mode': user_mode
+                'user_mode': user_mode,
+                'detected_color': detected_color,
+                'detected_shape': detected_shape
             }
             st.session_state.last_result = result_data
 
@@ -196,6 +200,8 @@ if st.session_state.last_result is not None:
     found_pill = result['found_pill']
     imprint = result['imprint']
     confidence = result['confidence']
+    detected_color = result.get('detected_color', 'Unknown')
+    detected_shape = result.get('detected_shape', 'Unknown')
 
     st.divider()
 
@@ -232,9 +238,9 @@ if st.session_state.last_result is not None:
 
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.caption(f"**Shape:** {found_pill.get('shape', 'N/A')}")
+            st.caption(f"**Shape:** {detected_shape}")
         with col2:
-            st.caption(f"**Color:** {found_pill.get('color', 'N/A')}")
+            st.caption(f"**Detected Color:** {detected_color}")
         with col3:
             st.caption(f"**NDC:** {found_pill.get('ndc', 'N/A')}")
         st.caption(f"Confidence: {confidence}% | Imprint: {imprint}")
@@ -245,9 +251,9 @@ if st.session_state.last_result is not None:
         st.markdown(f"**What to Do:** {found_pill.get('action', 'Monitor at home')}")
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.caption(f"**Shape:** {found_pill.get('shape', 'N/A')}")
+            st.caption(f"**Shape:** {detected_shape}")
         with col2:
-            st.caption(f"**Color:** {found_pill.get('color', 'N/A')}")
+            st.caption(f"**Color:** {detected_color}")
         with col3:
             st.caption(f"**NDC:** {found_pill.get('ndc', 'N/A')}")
         st.caption(f"Confidence: {confidence}% | Imprint: {imprint}")
@@ -272,9 +278,9 @@ if st.session_state.last_result is not None:
             st.markdown(f"## {found_pill.get('action', 'CALL POISON CONTROL 1-800-268-9017')}")
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.caption(f"**Shape:** {found_pill.get('shape', 'N/A')}")
+                st.caption(f"**Shape:** {detected_shape}")
             with col2:
-                st.caption(f"**Color:** {found_pill.get('color', 'N/A')}")
+                st.caption(f"**Detected Color:** {detected_color}")
             with col3:
                 st.caption(f"**NDC:** {found_pill.get('ndc', 'N/A')}")
 
