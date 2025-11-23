@@ -3,9 +3,14 @@ import google.generativeai as genai
 from PIL import Image
 import json
 import os
+from datetime import datetime
 
 # --- CONFIGURATION ---
 st.set_page_config(page_title="PillID Emergency", page_icon="🚨", layout="centered")
+
+# --- SESSION STATE ---
+if 'history' not in st.session_state:
+    st.session_state.history = []
 
 # --- SETUP GEMINI ---
 # Try to get key from secrets, otherwise look for env var
@@ -154,9 +159,41 @@ if img_file_buffer is not None:
 
                 st.caption(f"Confidence: {confidence}% | Imprint: {imprint}")
 
+                # Save to session history
+                history_entry = {
+                    'timestamp': datetime.now().strftime("%H:%M:%S"),
+                    'pill_name': found_pill['name'] if found_pill else 'Unknown',
+                    'risk_level': risk_level,
+                    'imprint': imprint,
+                    'confidence': confidence
+                }
+                st.session_state.history.append(history_entry)
+
         except Exception as e:
             st.error(f"Error analyzing image: {e}")
             st.warning("Please retake the photo with better lighting.")
+
+# --- SIDEBAR: SESSION HISTORY ---
+with st.sidebar:
+    st.markdown("## 📋 Session History")
+
+    if len(st.session_state.history) > 0:
+        st.caption(f"**{len(st.session_state.history)} pill(s) analyzed this session**")
+
+        if st.button("🗑️ Clear History"):
+            st.session_state.history = []
+            st.rerun()
+
+        st.markdown("---")
+
+        for idx, entry in enumerate(reversed(st.session_state.history)):
+            risk_color = "🟢" if "Low" in entry['risk_level'] else "🔴"
+            st.markdown(f"**{risk_color} {entry['timestamp']}**")
+            st.caption(f"{entry['pill_name']}")
+            st.caption(f"Confidence: {entry['confidence']}%")
+            st.markdown("---")
+    else:
+        st.info("No pills analyzed yet. Upload or scan a pill to start!")
 
 st.markdown("---")
 st.caption("⚠️ This is a Demo Tool. Always call professional medical help in emergencies.")
