@@ -66,8 +66,14 @@ Analyze the image and return valid JSON with this exact schema:
 st.title("🚨 PillID Emergency")
 st.markdown("**3-Second Triage for Accidental Poisonings**")
 
-# Camera Input
-img_file_buffer = st.camera_input("Take a clear photo of the pill")
+# Input Options (Camera OR Upload)
+tab1, tab2 = st.tabs(["📷 Take Photo", "📤 Upload Image"])
+
+with tab1:
+    img_file_buffer = st.camera_input("Take a clear photo of the pill")
+
+with tab2:
+    img_file_buffer = st.file_uploader("Upload a pill image", type=["jpg", "jpeg", "png", "webp"])
 
 if img_file_buffer is not None:
     # Show spinner while processing
