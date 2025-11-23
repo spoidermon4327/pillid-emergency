@@ -69,11 +69,17 @@ st.markdown("**3-Second Triage for Accidental Poisonings**")
 # Input Options (Camera OR Upload)
 tab1, tab2 = st.tabs(["📷 Take Photo", "📤 Upload Image"])
 
+img_file_buffer = None
+
 with tab1:
-    img_file_buffer = st.camera_input("Take a clear photo of the pill")
+    camera_image = st.camera_input("Take a clear photo of the pill")
+    if camera_image is not None:
+        img_file_buffer = camera_image
 
 with tab2:
-    img_file_buffer = st.file_uploader("Upload a pill image", type=["jpg", "jpeg", "png", "webp"])
+    uploaded_image = st.file_uploader("Upload a pill image", type=["jpg", "jpeg", "png", "webp"])
+    if uploaded_image is not None:
+        img_file_buffer = uploaded_image
 
 if img_file_buffer is not None:
     # Show spinner while processing
