@@ -11,6 +11,8 @@ st.set_page_config(page_title="PillID Emergency", page_icon="🚨", layout="cent
 # --- SESSION STATE ---
 if 'history' not in st.session_state:
     st.session_state.history = []
+if 'last_result' not in st.session_state:
+    st.session_state.last_result = None
 
 # --- SETUP GEMINI ---
 # Try to get key from secrets, otherwise look for env var
@@ -121,57 +123,73 @@ if img_file_buffer is not None:
             elif imprint == "NONE":
                 risk_level = "HIGH - UNKNOWN"
             
-            # 5. Display Results
-            st.divider()
-            
-            if risk_level == "Low" and found_pill:
-                st.success(f"✅ IDENTIFIED: {found_pill['name']}")
-                st.info(f"**Status:** Safe to Monitor")
-                st.markdown(f"**What to Do:** {found_pill.get('action', 'Monitor at home')}")
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.caption(f"**Shape:** {found_pill.get('shape', 'N/A')}")
-                with col2:
-                    st.caption(f"**Color:** {found_pill.get('color', 'N/A')}")
-                with col3:
-                    st.caption(f"**NDC:** {found_pill.get('ndc', 'N/A')}")
-                st.caption(f"Confidence: {confidence}% | Imprint: {imprint}")
+            # 5. Save to session state FIRST
+            result_data = {
+                'risk_level': risk_level,
+                'found_pill': found_pill,
+                'imprint': imprint,
+                'confidence': confidence
+            }
+            st.session_state.last_result = result_data
 
-            else:
-                st.error("🚨 HIGH RISK ALERT")
-                if found_pill:
-                    st.write(f"**Possible Match:** {found_pill['name']}")
-                    st.write(f"**Description:** {found_pill.get('description', 'Unknown')}")
-                    st.markdown(f"### ⚠️ ACTION REQUIRED")
-                    st.markdown(f"## {found_pill.get('action', 'CALL POISON CONTROL 1-800-268-9017')}")
-                    col1, col2, col3 = st.columns(3)
-                    with col1:
-                        st.caption(f"**Shape:** {found_pill.get('shape', 'N/A')}")
-                    with col2:
-                        st.caption(f"**Color:** {found_pill.get('color', 'N/A')}")
-                    with col3:
-                        st.caption(f"**NDC:** {found_pill.get('ndc', 'N/A')}")
-                else:
-                    st.write("**Unknown Pill Detected**")
-                    st.write("Imprint not recognized or confidence too low.")
-                    st.markdown("### 📞 CALL POISON CONTROL NOW")
-                    st.markdown("### [1-800-268-9017](tel:18002689017)")
-
-                st.caption(f"Confidence: {confidence}% | Imprint: {imprint}")
-
-                # Save to session history
-                history_entry = {
-                    'timestamp': datetime.now().strftime("%H:%M:%S"),
-                    'pill_name': found_pill['name'] if found_pill else 'Unknown',
-                    'risk_level': risk_level,
-                    'imprint': imprint,
-                    'confidence': confidence
-                }
-                st.session_state.history.append(history_entry)
+            # Save to history
+            history_entry = {
+                'timestamp': datetime.now().strftime("%H:%M:%S"),
+                'pill_name': found_pill['name'] if found_pill else 'Unknown',
+                'risk_level': risk_level,
+                'imprint': imprint,
+                'confidence': confidence
+            }
+            st.session_state.history.append(history_entry)
 
         except Exception as e:
             st.error(f"Error analyzing image: {e}")
             st.warning("Please retake the photo with better lighting.")
+
+# Display last result (persists across input method changes)
+if st.session_state.last_result is not None:
+    result = st.session_state.last_result
+    risk_level = result['risk_level']
+    found_pill = result['found_pill']
+    imprint = result['imprint']
+    confidence = result['confidence']
+
+    st.divider()
+
+    if risk_level == "Low" and found_pill:
+        st.success(f"✅ IDENTIFIED: {found_pill['name']}")
+        st.info(f"**Status:** Safe to Monitor")
+        st.markdown(f"**What to Do:** {found_pill.get('action', 'Monitor at home')}")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.caption(f"**Shape:** {found_pill.get('shape', 'N/A')}")
+        with col2:
+            st.caption(f"**Color:** {found_pill.get('color', 'N/A')}")
+        with col3:
+            st.caption(f"**NDC:** {found_pill.get('ndc', 'N/A')}")
+        st.caption(f"Confidence: {confidence}% | Imprint: {imprint}")
+
+    else:
+        st.error("🚨 HIGH RISK ALERT")
+        if found_pill:
+            st.write(f"**Possible Match:** {found_pill['name']}")
+            st.write(f"**Description:** {found_pill.get('description', 'Unknown')}")
+            st.markdown(f"### ⚠️ ACTION REQUIRED")
+            st.markdown(f"## {found_pill.get('action', 'CALL POISON CONTROL 1-800-268-9017')}")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.caption(f"**Shape:** {found_pill.get('shape', 'N/A')}")
+            with col2:
+                st.caption(f"**Color:** {found_pill.get('color', 'N/A')}")
+            with col3:
+                st.caption(f"**NDC:** {found_pill.get('ndc', 'N/A')}")
+        else:
+            st.write("**Unknown Pill Detected**")
+            st.write("Imprint not recognized or confidence too low.")
+            st.markdown("### 📞 CALL POISON CONTROL NOW")
+            st.markdown("### [1-800-268-9017](tel:18002689017)")
+
+        st.caption(f"Confidence: {confidence}% | Imprint: {imprint}")
 
 # --- SIDEBAR: SESSION HISTORY ---
 with st.sidebar:
