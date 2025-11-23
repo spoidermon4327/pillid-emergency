@@ -1,0 +1,89 @@
+import json
+
+# Rich pill database with FDA NDC and Health Canada data
+# Focused on most commonly ingested pills in poisoning cases
+
+pills_database = [
+    # === EXTREME HIGH RISK - OPIOIDS (Most Counterfeited) ===
+    {"imprint": "M30", "name": "Oxycodone 30mg", "ndc": "0406-8530", "risk": "High", "shape": "round", "color": "blue", "description": "Opioid - EXTREME RISK - Most Counterfeited Pill - Likely Fentanyl", "action": "CALL 911 IMMEDIATELY"},
+    {"imprint": "A215", "name": "Oxycodone 30mg", "ndc": "0228-2015", "risk": "High", "shape": "round", "color": "blue", "description": "Opioid - EXTREME RISK - Commonly Counterfeited - Possible Fentanyl", "action": "CALL 911 IMMEDIATELY"},
+    {"imprint": "M367", "name": "Hydrocodone/Acetaminophen 10/325", "ndc": "0406-0367", "risk": "High", "shape": "oblong", "color": "white", "description": "Opioid - HIGH RISK - Possible Counterfeit Fentanyl", "action": "CALL 911 IMMEDIATELY"},
+    {"imprint": "M523", "name": "Oxycodone/Acetaminophen 10/325", "ndc": "0406-0523", "risk": "High", "shape": "oblong", "color": "white", "description": "Opioid - HIGH RISK - Possible Counterfeit", "action": "CALL 911 IMMEDIATELY"},
+    {"imprint": "K56", "name": "Oxycodone 10mg", "ndc": "10702-056", "risk": "High", "shape": "round", "color": "pink", "description": "Opioid - HIGH RISK", "action": "CALL 911 IMMEDIATELY"},
+    {"imprint": "RP 10", "name": "Oxycodone 10mg", "ndc": "42858-010", "risk": "High", "shape": "round", "color": "white", "description": "Opioid - HIGH RISK", "action": "CALL 911 IMMEDIATELY"},
+    {"imprint": "224", "name": "Hydromorphone 2mg (Dilaudid)", "ndc": "0406-0224", "risk": "High", "shape": "round", "color": "orange", "description": "Very Strong Opioid - EXTREME RISK", "action": "CALL 911 IMMEDIATELY"},
+    {"imprint": "M 2", "name": "Hydromorphone 2mg", "ndc": "0406-1002", "risk": "High", "shape": "round", "color": "orange", "description": "Very Strong Opioid - EXTREME RISK", "action": "CALL 911 IMMEDIATELY"},
+    {"imprint": "IP33", "name": "Acetaminophen/Codeine 300/30", "ndc": "65162-033", "risk": "High", "shape": "round", "color": "white", "description": "Opioid - HIGH RISK", "action": "CALL POISON CONTROL 1-800-268-9017"},
+    {"imprint": "WATSON 853", "name": "Hydrocodone/Acetaminophen 10/325", "ndc": "0591-0853", "risk": "High", "shape": "oblong", "color": "yellow", "description": "Opioid - HIGH RISK", "action": "CALL 911 IMMEDIATELY"},
+    {"imprint": "IP 204", "name": "Oxycodone/Acetaminophen 10/325", "ndc": "65162-204", "risk": "High", "shape": "oblong", "color": "white", "description": "Opioid - HIGH RISK", "action": "CALL 911 IMMEDIATELY"},
+    {"imprint": "M 360", "name": "Hydrocodone/Acetaminophen 7.5/750", "ndc": "0406-0360", "risk": "High", "shape": "oblong", "color": "white", "description": "Opioid - HIGH RISK", "action": "CALL 911 IMMEDIATELY"},
+    {"imprint": "IP 101", "name": "Tramadol 50mg", "ndc": "65162-101", "risk": "High", "shape": "round", "color": "white", "description": "Opioid-like Painkiller - HIGH RISK", "action": "CALL POISON CONTROL 1-800-268-9017"},
+    {"imprint": "AN 627", "name": "Tramadol 50mg", "ndc": "65162-627", "risk": "High", "shape": "round", "color": "white", "description": "Opioid-like Painkiller - HIGH RISK", "action": "CALL POISON CONTROL 1-800-268-9017"},
+
+    # === HIGH RISK - BENZODIAZEPINES (Respiratory Depression) ===
+    {"imprint": "XANAX 2", "name": "Alprazolam 2mg", "ndc": "0009-0094", "risk": "High", "shape": "oblong", "color": "white", "description": "Benzodiazepine - HIGH RISK - Respiratory Depression", "action": "CALL POISON CONTROL 1-800-268-9017"},
+    {"imprint": "R 2", "name": "Alprazolam 2mg", "ndc": "0228-3002", "risk": "High", "shape": "rectangular", "color": "white", "description": "Benzodiazepine (Xanax) - HIGH RISK", "action": "CALL POISON CONTROL 1-800-268-9017"},
+    {"imprint": "V 2090", "name": "Alprazolam 0.5mg", "ndc": "0603-2090", "risk": "High", "shape": "oval", "color": "yellow", "description": "Benzodiazepine (Xanax) - HIGH RISK", "action": "CALL POISON CONTROL 1-800-268-9017"},
+    {"imprint": "N 2", "name": "Clonazepam 2mg", "ndc": "65162-428", "risk": "High", "shape": "round", "color": "white", "description": "Benzodiazepine - HIGH RISK - Can Stop Breathing", "action": "CALL POISON CONTROL 1-800-268-9017"},
+    {"imprint": "C 14", "name": "Clonazepam 1mg", "ndc": "0228-2003", "risk": "High", "shape": "round", "color": "blue", "description": "Benzodiazepine - HIGH RISK", "action": "CALL POISON CONTROL 1-800-268-9017"},
+    {"imprint": "2684", "name": "Lorazepam 2mg (Ativan)", "ndc": "0603-2684", "risk": "High", "shape": "round", "color": "white", "description": "Benzodiazepine - HIGH RISK", "action": "CALL POISON CONTROL 1-800-268-9017"},
+    {"imprint": "5 MG", "name": "Diazepam 5mg (Valium)", "ndc": "0140-0005", "risk": "High", "shape": "round", "color": "yellow", "description": "Benzodiazepine - HIGH RISK", "action": "CALL POISON CONTROL 1-800-268-9017"},
+    {"imprint": "TEVA 3927", "name": "Diazepam 10mg", "ndc": "0093-3927", "risk": "High", "shape": "round", "color": "blue", "description": "Benzodiazepine (Valium) - HIGH RISK", "action": "CALL POISON CONTROL 1-800-268-9017"},
+
+    # === HIGH RISK - CARDIOVASCULAR (Dangerous for Children) ===
+    {"imprint": "NORVASC 10", "name": "Amlodipine 10mg", "ndc": "0069-1540", "risk": "High", "shape": "round", "color": "white", "description": "Blood Pressure Med - Causes Heart Issues in Children", "action": "CALL POISON CONTROL 1-800-268-9017"},
+    {"imprint": "APO 10", "name": "Amlodipine 10mg", "ndc": "60505-0169", "risk": "High", "shape": "round", "color": "white", "description": "Blood Pressure Med - Dangerous for Children", "action": "CALL POISON CONTROL 1-800-268-9017"},
+    {"imprint": "L 4", "name": "Lisinopril 10mg", "ndc": "68084-844", "risk": "High", "shape": "round", "color": "pink", "description": "Blood Pressure Med - Dangerous for Children", "action": "CALL POISON CONTROL 1-800-268-9017"},
+    {"imprint": "L 25", "name": "Lisinopril 5mg", "ndc": "68180-513", "risk": "High", "shape": "round", "color": "white", "description": "Blood Pressure Med - Dangerous for Children", "action": "CALL POISON CONTROL 1-800-268-9017"},
+
+    # === HIGH RISK - ANTIPSYCHOTICS (Severe Sedation) ===
+    {"imprint": "SEROQUEL 200", "name": "Quetiapine 200mg", "ndc": "0310-0272", "risk": "High", "shape": "round", "color": "yellow", "description": "Antipsychotic - TOXIC - Severe Sedation", "action": "CALL POISON CONTROL 1-800-268-9017"},
+    {"imprint": "APO QUE 25", "name": "Quetiapine 25mg", "ndc": "60505-0109", "risk": "High", "shape": "round", "color": "peach", "description": "Antipsychotic - HIGH RISK", "action": "CALL POISON CONTROL 1-800-268-9017"},
+
+    # === HIGH RISK - MUSCLE RELAXANTS ===
+    {"imprint": "DAN 5513", "name": "Carisoprodol 350mg", "ndc": "00591-5513", "risk": "High", "shape": "round", "color": "white", "description": "Muscle Relaxant - HIGH RISK - Severe Sedation", "action": "CALL POISON CONTROL 1-800-268-9017"},
+    {"imprint": "V 2410", "name": "Carisoprodol 350mg", "ndc": "0603-2410", "risk": "High", "shape": "round", "color": "white", "description": "Muscle Relaxant - HIGH RISK", "action": "CALL POISON CONTROL 1-800-268-9017"},
+
+    # === HIGH RISK - ANTIDEPRESSANTS (Toxic in Children) ===
+    {"imprint": "APO AMI 25", "name": "Amitriptyline 25mg", "ndc": "60505-0138", "risk": "High", "shape": "round", "color": "yellow", "description": "Antidepressant - TOXIC in Children", "action": "CALL POISON CONTROL 1-800-268-9017"},
+
+    # === MEDIUM RISK - MONITOR ===
+    {"imprint": "METFORMIN 500", "name": "Metformin 500mg", "ndc": "0093-7214", "risk": "Medium", "shape": "round", "color": "white", "description": "Diabetes Med - Can Cause Low Blood Sugar", "action": "Call Poison Control if child shows signs of weakness/sweating"},
+    {"imprint": "APO MET 500", "name": "Metformin 500mg", "ndc": "60505-0114", "risk": "Medium", "shape": "round", "color": "white", "description": "Diabetes Med - Monitor Blood Sugar", "action": "Monitor for 4 hours, call if symptoms"},
+    {"imprint": "C 73", "name": "Gabapentin 300mg", "ndc": "0228-2003", "risk": "Medium", "shape": "capsule", "color": "yellow", "description": "Nerve Pain Med - Monitor for Sedation", "action": "Monitor for drowsiness, call if severe"},
+    {"imprint": "R 180", "name": "Methylphenidate 10mg (Ritalin)", "ndc": "0228-2018", "risk": "Medium", "shape": "round", "color": "pale green", "description": "ADHD Med - Monitor Heart Rate", "action": "Monitor heart rate and behavior"},
+    {"imprint": "30 M", "name": "Adderall 30mg", "ndc": "0555-0973", "risk": "Medium", "shape": "round", "color": "orange", "description": "ADHD Stimulant - Monitor Heart Rate", "action": "Monitor heart rate, call if racing"},
+    {"imprint": "44 329", "name": "Diphenhydramine 25mg (Benadryl)", "ndc": "0113-0329", "risk": "Medium", "shape": "capsule", "color": "pink/white", "description": "Antihistamine - Monitor for Drowsiness", "action": "Monitor for excessive drowsiness"},
+    {"imprint": "ZC 25", "name": "Diphenhydramine 25mg", "ndc": "68084-519", "risk": "Medium", "shape": "capsule", "color": "pink", "description": "Antihistamine (Benadryl)", "action": "Monitor for sedation"},
+    {"imprint": "ZOLOFT 50", "name": "Sertraline 50mg", "ndc": "0049-4960", "risk": "Medium", "shape": "oblong", "color": "light blue", "description": "Antidepressant - Monitor", "action": "Monitor for nausea/dizziness"},
+    {"imprint": "PAXIL 20", "name": "Paroxetine 20mg", "ndc": "0029-3120", "risk": "Medium", "shape": "oval", "color": "pink", "description": "Antidepressant - Monitor", "action": "Monitor behavior for 4 hours"},
+    {"imprint": "PROZAC 20", "name": "Fluoxetine 20mg", "ndc": "0777-6150", "risk": "Medium", "shape": "capsule", "color": "green/white", "description": "Antidepressant - Monitor", "action": "Monitor behavior"},
+    {"imprint": "APO 025", "name": "Levothyroxine 25mcg", "ndc": "60505-0817", "risk": "Medium", "shape": "round", "color": "orange", "description": "Thyroid Hormone - Monitor", "action": "Monitor heart rate for 6 hours"},
+    {"imprint": "SYNTHROID 50", "name": "Levothyroxine 50mcg", "ndc": "0074-4152", "risk": "Medium", "shape": "round", "color": "white", "description": "Thyroid Med - Monitor", "action": "Monitor heart rate"},
+    {"imprint": "LASIX 40", "name": "Furosemide 40mg", "ndc": "0039-0064", "risk": "Medium", "shape": "round", "color": "white", "description": "Diuretic - Can Cause Dehydration", "action": "Ensure hydration, monitor for 4 hours"},
+
+    # === LOW RISK - SAFE OTC ===
+    {"imprint": "ADVIL", "name": "Ibuprofen 200mg", "ndc": "0573-0165", "risk": "Low", "shape": "round", "color": "orange/brown", "description": "Pain Reliever (NSAID) - Safe in Normal Doses", "action": "Safe - Monitor at home. Call if >10 pills ingested"},
+    {"imprint": "IBU 200", "name": "Ibuprofen 200mg", "ndc": "0113-0820", "risk": "Low", "shape": "round", "color": "orange", "description": "Pain Reliever (NSAID)", "action": "Safe - Monitor. Ensure food intake"},
+    {"imprint": "IBU", "name": "Ibuprofen 200mg", "ndc": "0113-0180", "risk": "Low", "shape": "round", "color": "orange", "description": "Pain Reliever (NSAID)", "action": "Safe - Monitor at home"},
+    {"imprint": "TYLENOL", "name": "Acetaminophen 325mg", "ndc": "0045-0425", "risk": "Low", "shape": "oblong", "color": "white", "description": "Pain Reliever - Safe but Monitor", "action": "Safe - Call if >5 pills (potential liver damage)"},
+    {"imprint": "44 175", "name": "Acetaminophen 500mg", "ndc": "0113-0175", "risk": "Low", "shape": "oblong", "color": "white", "description": "Pain Reliever - Monitor Total Dose", "action": "Safe - Call if >3 pills ingested"},
+    {"imprint": "L 544", "name": "Acetaminophen 500mg", "ndc": "68084-544", "risk": "Low", "shape": "round", "color": "white", "description": "Pain Reliever - Safe OTC", "action": "Safe - Monitor total daily acetaminophen"},
+    {"imprint": "L 484", "name": "Acetaminophen 500mg", "ndc": "68084-484", "risk": "Low", "shape": "oblong", "color": "white", "description": "Pain Reliever (Generic Tylenol)", "action": "Safe - Monitor for stomach upset"},
+    {"imprint": "ALEVE", "name": "Naproxen 220mg", "ndc": "0280-3505", "risk": "Low", "shape": "oval", "color": "blue", "description": "Pain Reliever (NSAID) - Safe OTC", "action": "Safe - Give with food"},
+    {"imprint": "ASPIRIN 81", "name": "Aspirin 81mg", "ndc": "0113-0481", "risk": "Low", "shape": "round", "color": "white", "description": "Baby Aspirin - Low Dose", "action": "Safe - Low risk"},
+    {"imprint": "LIPITOR 40", "name": "Atorvastatin 40mg", "ndc": "0071-0156", "risk": "Low", "shape": "oval", "color": "white", "description": "Cholesterol Med - Low Risk in Single Dose", "action": "Safe - Low risk from single pill"},
+
+    # === CANADIAN-SPECIFIC BRANDS ===
+    {"imprint": "APO", "name": "Apotex Generic", "ndc": "CAN-APO", "risk": "Unknown", "shape": "varies", "color": "varies", "description": "Canadian Generic Brand - Check Full Imprint", "action": "CALL POISON CONTROL - Generic brand needs full ID"},
+    {"imprint": "TEVA", "name": "Teva Generic", "ndc": "CAN-TEVA", "risk": "Unknown", "shape": "varies", "color": "varies", "description": "Canadian/International Generic - Check Full Imprint", "action": "CALL POISON CONTROL"},
+]
+
+# Save as JSON
+with open('pills_db_rich.json', 'w') as f:
+    json.dump(pills_database, f, indent=2)
+
+print(f"SUCCESS: Created rich database with {len(pills_database)} pills")
+print(f"   - High Risk: {len([p for p in pills_database if p['risk'] == 'High'])}")
+print(f"   - Medium Risk: {len([p for p in pills_database if p['risk'] == 'Medium'])}")
+print(f"   - Low Risk: {len([p for p in pills_database if p['risk'] == 'Low'])}")
