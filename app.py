@@ -3,6 +3,7 @@ import google.generativeai as genai
 from PIL import Image
 import json
 import os
+import re
 from datetime import datetime
 
 # --- CONFIGURATION ---
@@ -55,17 +56,27 @@ PILL_DB = load_db()
 
 # --- PROMPT ENGINEERING ---
 SYSTEM_PROMPT = """
-You are a conservative medical triage assistant for emergency pill identification.
-Your Goal: Identify the pill imprint, shape, and color from the image.
-CRITICAL SAFETY RULE: If you are not 100% sure, or if the pill is blurry/damaged, you MUST classify as "Unknown".
-Better to raise a false alarm than miss a dangerous pill.
+You are PillID Emergency — a hyper-conservative triage toxicologist.
+Your #1 rule: NEVER say high confidence unless you are 100% certain.
+Prioritize child safety above all else.
 
-Analyze the image and return valid JSON with this exact schema:
+CRITICAL SAFETY RULES (set confidence low if ANY apply):
+- Image is blurry, dark, or poor quality → confidence MAX 30
+- Pill is broken, chewed, or damaged → confidence MAX 40
+- Image is a screenshot of another screen → confidence MAX 20
+- No pill visible in image → imprint_found = "None", confidence = 0
+- Multiple pills or unclear which pill → confidence MAX 50
+- Imprint is partially visible or unclear → confidence MAX 60
+
+Your goal: Extract pill imprint, shape, and color from the image.
+Return STRICT JSON only. No explanations. No apologies.
+
+JSON Schema (must match exactly):
 {
-  "imprint_found": "string (text visible on pill, or 'None')",
-  "shape": "string (round, oblong, oval, etc)",
+  "imprint_found": "string (exact text on pill, or 'None' if no pill/no imprint)",
+  "shape": "string (round, oblong, oval, capsule, etc.)",
   "color": "string",
-  "confidence": "integer (0-100)"
+  "confidence": "integer (0-100, be VERY conservative)"
 }
 """
 
@@ -106,22 +117,45 @@ if img_file_buffer is not None:
             # 4. Triage Logic
             imprint = data.get("imprint_found", "None").upper().strip()
             confidence = data.get("confidence", 0)
-            
+
             risk_level = "UNKNOWN"
             found_pill = None
-            
-            # Check against Local DB
+
+            # Check against Local DB (improved matching - require substantial overlap)
             for pill in PILL_DB:
-                if pill["imprint"] in imprint and imprint != "NONE":
+                pill_imprint = pill["imprint"].upper()
+                # More strict matching: pill imprint must be IN the detected imprint
+                # and must be at least 2 characters to avoid false matches
+                if len(pill_imprint) >= 2 and pill_imprint in imprint and imprint != "NONE":
                     found_pill = pill
                     risk_level = pill["risk"]
                     break
-            
-            # Conservative Overrides
-            if confidence < 80:
+
+            # NUCLEAR SAFETY OVERRIDES (order matters - most conservative first)
+
+            # 1. Opioid Pattern Detection (ONLY if pill not in database)
+            # This prevents false positives on known safe pills like "IBU 200"
+            if not found_pill:
+                opioid_patterns = [
+                    r'\bM\d{2,4}\b',      # M30, M367, M523, etc.
+                    r'\bA\d{2,4}\b',      # A215, A51, etc.
+                    r'\bK\d{2,4}\b',      # K56, K9, etc.
+                    r'\bIP\s?\d{2,4}\b',  # IP204, IP 101, etc.
+                    r'\bRP\s?\d{1,4}\b',  # RP 10, RP30, etc.
+                    r'^\d{3,4}$'          # ONLY pure numbers (224, 512) - not "IBU 200"
+                ]
+                for pattern in opioid_patterns:
+                    if re.search(pattern, imprint):
+                        risk_level = "HIGH - OPIOID PATTERN - POSSIBLE FENTANYL"
+                        break
+
+            # 2. No pill detected / no imprint
+            if imprint == "NONE" or confidence == 0:
+                risk_level = "HIGH - NO PILL DETECTED"
+
+            # 3. Low confidence (blurry, dark, damaged, screenshot)
+            elif confidence < 80:
                 risk_level = "HIGH - LOW CONFIDENCE"
-            elif imprint == "NONE":
-                risk_level = "HIGH - UNKNOWN"
             
             # 5. Save to session state FIRST
             result_data = {
@@ -171,7 +205,18 @@ if st.session_state.last_result is not None:
 
     else:
         st.error("🚨 HIGH RISK ALERT")
-        if found_pill:
+
+        # Special handling for NO PILL DETECTED case
+        if "NO PILL DETECTED" in risk_level:
+            st.write("**⚠️ No Pill Visible in Image**")
+            st.markdown("### If a child may have swallowed anything:")
+            st.markdown("## 📞 CALL POISON CONTROL NOW")
+            st.markdown("## [1-800-268-9017](tel:18002689017)")
+            st.write("If the child is unconscious or having trouble breathing:")
+            st.markdown("## 🚨 CALL 911 IMMEDIATELY")
+
+        # Pill detected with database match
+        elif found_pill:
             st.write(f"**Possible Match:** {found_pill['name']}")
             st.write(f"**Description:** {found_pill.get('description', 'Unknown')}")
             st.markdown(f"### ⚠️ ACTION REQUIRED")
@@ -183,12 +228,22 @@ if st.session_state.last_result is not None:
                 st.caption(f"**Color:** {found_pill.get('color', 'N/A')}")
             with col3:
                 st.caption(f"**NDC:** {found_pill.get('ndc', 'N/A')}")
-        else:
-            st.write("**Unknown Pill Detected**")
-            st.write("Imprint not recognized or confidence too low.")
-            st.markdown("### 📞 CALL POISON CONTROL NOW")
-            st.markdown("### [1-800-268-9017](tel:18002689017)")
 
+        # Unknown pill or opioid pattern
+        else:
+            if "OPIOID PATTERN" in risk_level:
+                st.write("**⚠️ OPIOID-LIKE IMPRINT DETECTED**")
+                st.write(f"**Pattern:** {imprint}")
+                st.markdown("### 🚨 EXTREME RISK - POSSIBLE COUNTERFEIT FENTANYL")
+                st.markdown("## CALL 911 IMMEDIATELY")
+                st.markdown("## [911](tel:911)")
+            else:
+                st.write("**Unknown Pill Detected**")
+                st.write("Imprint not recognized or confidence too low.")
+                st.markdown("### 📞 CALL POISON CONTROL NOW")
+                st.markdown("### [1-800-268-9017](tel:18002689017)")
+
+        st.caption(f"Risk Level: {risk_level}")
         st.caption(f"Confidence: {confidence}% | Imprint: {imprint}")
 
 # --- SIDEBAR: SESSION HISTORY ---

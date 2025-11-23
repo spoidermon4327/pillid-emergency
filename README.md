@@ -23,11 +23,13 @@ When a 3-year-old swallows grandma's heart medication, every second counts. Goog
 
 ## The Solution
 
-PillID Emergency uses **Google Gemini 1.5 Flash Vision** to identify pills in **3 seconds** and provide instant risk triage with specific actions:
+PillID Emergency uses **Google Gemini 2.5 Flash Vision** to identify pills in **3 seconds** and provide instant risk triage with specific actions:
 
 ### Features
 
+- **Dual input methods**: Camera capture or image upload with seamless switching
 - **Camera-based pill identification**: Snap a photo of any loose pill
+- **Image upload option**: Upload existing photos for analysis
 - **AI-powered OCR**: Gemini Vision extracts pill imprint, shape, and color
 - **Conservative risk algorithm**:
   - Unknown imprint → HIGH RISK
@@ -35,6 +37,8 @@ PillID Emergency uses **Google Gemini 1.5 Flash Vision** to identify pills in **
   - Opioid-like appearance (M30, M367, A215) → HIGH RISK - Possible Fentanyl
 - **Rich medical database**: 56 critical pills with FDA NDC codes
 - **Specific action guidance**: Tells parents exactly what to do (call 911 vs. monitor)
+- **Session history tracking**: View all pills analyzed during your session with timestamps
+- **Persistent results**: Results stay visible when switching between input methods
 - **One-tap emergency call** to Canada Poison Control (1-800-268-9017)
 
 ---
@@ -61,7 +65,7 @@ PillID Emergency uses **Google Gemini 1.5 Flash Vision** to identify pills in **
 ## Technology Stack
 
 - **Frontend**: Streamlit (fast prototyping, mobile-responsive)
-- **AI/ML**: Google Gemini 1.5 Flash Vision
+- **AI/ML**: Google Gemini 2.5 Flash Vision
   - Multimodal OCR for tiny pill imprints (2-4mm)
   - Structured JSON output with confidence scoring
   - Temperature=0.0 for deterministic medical safety
@@ -153,6 +157,7 @@ pillid-emergency/
 - **Production-ready architecture**: Deployed, tested, scalable
 
 ### Best Use of Gemini API
+- **Gemini 2.5 Flash** - Latest model with enhanced vision capabilities
 - **Multimodal vision** for OCR on 2-4mm pill imprints
 - **Structured JSON output** with confidence scoring
 - **1M context window** for grounding with medical databases
