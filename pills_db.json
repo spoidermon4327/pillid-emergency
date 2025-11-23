@@ -147,7 +147,9 @@
     "shape": "oblong",
     "color": "white",
     "description": "Benzodiazepine - HIGH RISK - Respiratory Depression",
-    "action": "CALL POISON CONTROL 1-800-268-9017"
+    "action": "CALL POISON CONTROL 1-800-268-9017",
+    "pet_toxic": "High",
+    "pet_action": "🚨 CALL VET EMERGENCY - Severe sedation and respiratory depression in pets"
   },
   {
     "imprint": "R 2",
@@ -157,7 +159,9 @@
     "shape": "rectangular",
     "color": "white",
     "description": "Benzodiazepine (Xanax) - HIGH RISK",
-    "action": "CALL POISON CONTROL 1-800-268-9017"
+    "action": "CALL POISON CONTROL 1-800-268-9017",
+    "pet_toxic": "High",
+    "pet_action": "🚨 CALL VET EMERGENCY - Dangerous for pets"
   },
   {
     "imprint": "V 2090",
@@ -447,7 +451,9 @@
     "shape": "round",
     "color": "orange/brown",
     "description": "Pain Reliever (NSAID) - Safe in Normal Doses",
-    "action": "Safe - Monitor at home. Call if >10 pills ingested"
+    "action": "Safe - Monitor at home. Call if >10 pills ingested",
+    "pet_toxic": "EXTREME",
+    "pet_action": "🚨 CALL VET EMERGENCY - Causes kidney failure and stomach ulcers in dogs/cats"
   },
   {
     "imprint": "IBU 200",
@@ -457,7 +463,9 @@
     "shape": "round",
     "color": "orange",
     "description": "Pain Reliever (NSAID)",
-    "action": "Safe - Monitor. Ensure food intake"
+    "action": "Safe - Monitor. Ensure food intake",
+    "pet_toxic": "EXTREME",
+    "pet_action": "🚨 CALL VET EMERGENCY - Kidney failure risk in pets"
   },
   {
     "imprint": "IBU",
@@ -467,7 +475,9 @@
     "shape": "round",
     "color": "orange",
     "description": "Pain Reliever (NSAID)",
-    "action": "Safe - Monitor at home"
+    "action": "Safe - Monitor at home",
+    "pet_toxic": "EXTREME",
+    "pet_action": "🚨 CALL VET EMERGENCY - Toxic to dogs and cats"
   },
   {
     "imprint": "TYLENOL",
@@ -477,7 +487,9 @@
     "shape": "oblong",
     "color": "white",
     "description": "Pain Reliever - Safe but Monitor",
-    "action": "Safe - Call if >5 pills (potential liver damage)"
+    "action": "Safe - Call if >5 pills (potential liver damage)",
+    "pet_toxic": "LETHAL",
+    "pet_action": "💀 DEADLY TO CATS - CALL VET 911 NOW - Even ½ tablet can kill a cat. Toxic to dogs."
   },
   {
     "imprint": "44 175",
@@ -487,7 +499,9 @@
     "shape": "oblong",
     "color": "white",
     "description": "Pain Reliever - Monitor Total Dose",
-    "action": "Safe - Call if >3 pills ingested"
+    "action": "Safe - Call if >3 pills ingested",
+    "pet_toxic": "LETHAL",
+    "pet_action": "💀 DEADLY TO CATS - Liver failure in dogs - CALL VET EMERGENCY"
   },
   {
     "imprint": "L 544",
@@ -497,7 +511,9 @@
     "shape": "round",
     "color": "white",
     "description": "Pain Reliever - Safe OTC",
-    "action": "Safe - Monitor total daily acetaminophen"
+    "action": "Safe - Monitor total daily acetaminophen",
+    "pet_toxic": "LETHAL",
+    "pet_action": "💀 DEADLY TO CATS - Cannot metabolize acetaminophen - VET EMERGENCY"
   },
   {
     "imprint": "L 484",
@@ -507,7 +523,9 @@
     "shape": "oblong",
     "color": "white",
     "description": "Pain Reliever (Generic Tylenol)",
-    "action": "Safe - Monitor for stomach upset"
+    "action": "Safe - Monitor for stomach upset",
+    "pet_toxic": "LETHAL",
+    "pet_action": "💀 DEADLY TO CATS - Toxic to dogs - CALL VET IMMEDIATELY"
   },
   {
     "imprint": "ALEVE",
@@ -517,7 +535,9 @@
     "shape": "oval",
     "color": "blue",
     "description": "Pain Reliever (NSAID) - Safe OTC",
-    "action": "Safe - Give with food"
+    "action": "Safe - Give with food",
+    "pet_toxic": "EXTREME",
+    "pet_action": "🚨 CALL VET EMERGENCY - More toxic than ibuprofen to pets"
   },
   {
     "imprint": "ASPIRIN 81",

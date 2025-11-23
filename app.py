@@ -84,6 +84,9 @@ JSON Schema (must match exactly):
 st.title("🚨 PillID Emergency")
 st.markdown("**3-Second Triage for Accidental Poisonings**")
 
+# MODE SELECTION (Human or Pet)
+user_mode = st.radio("Who was exposed?", ["👶 Human", "🐕 Pet"], horizontal=True)
+
 # Input Options (Camera OR Upload)
 input_method = st.radio("Choose input method:", ["📷 Take Photo", "📤 Upload Image"], horizontal=True)
 
@@ -120,6 +123,7 @@ if img_file_buffer is not None:
 
             risk_level = "UNKNOWN"
             found_pill = None
+            is_pet_mode = (user_mode == "🐕 Pet")
 
             # Check against Local DB (improved matching - require substantial overlap)
             for pill in PILL_DB:
@@ -130,6 +134,10 @@ if img_file_buffer is not None:
                     found_pill = pill
                     risk_level = pill["risk"]
                     break
+
+            # PET MODE OVERRIDE - Check if pill is toxic to pets
+            if is_pet_mode and found_pill and found_pill.get("pet_toxic"):
+                risk_level = f"PET-TOXIC-{found_pill.get('pet_toxic')}"
 
             # NUCLEAR SAFETY OVERRIDES (order matters - most conservative first)
 
@@ -162,7 +170,8 @@ if img_file_buffer is not None:
                 'risk_level': risk_level,
                 'found_pill': found_pill,
                 'imprint': imprint,
-                'confidence': confidence
+                'confidence': confidence,
+                'user_mode': user_mode
             }
             st.session_state.last_result = result_data
 
@@ -190,7 +199,47 @@ if st.session_state.last_result is not None:
 
     st.divider()
 
-    if risk_level == "Low" and found_pill:
+    # PET TOXICITY DISPLAY (Purple Screen)
+    if "PET-TOXIC" in risk_level:
+        toxicity_level = risk_level.split("-")[-1]  # Extract LETHAL, EXTREME, or High
+
+        # Custom CSS for purple warning
+        st.markdown("""
+        <style>
+        .pet-toxic-box {
+            background-color: #8B00FF;
+            padding: 20px;
+            border-radius: 10px;
+            border: 3px solid #FF00FF;
+            color: white;
+            text-align: center;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+        if toxicity_level == "LETHAL":
+            st.markdown('<div class="pet-toxic-box"><h1>💀 DEADLY TO PETS 💀</h1></div>', unsafe_allow_html=True)
+        elif toxicity_level == "EXTREME":
+            st.markdown('<div class="pet-toxic-box"><h1>🚨 EXTREMELY TOXIC TO PETS 🚨</h1></div>', unsafe_allow_html=True)
+        else:
+            st.markdown('<div class="pet-toxic-box"><h1>⚠️ TOXIC TO PETS ⚠️</h1></div>', unsafe_allow_html=True)
+
+        st.error(f"**IDENTIFIED:** {found_pill['name']}")
+        st.markdown(f"### {found_pill.get('pet_action', 'CALL VET EMERGENCY IMMEDIATELY')}")
+
+        st.warning("**For Humans:** This medication is safe at normal doses")
+        st.info(f"**Human Action:** {found_pill.get('action', 'N/A')}")
+
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.caption(f"**Shape:** {found_pill.get('shape', 'N/A')}")
+        with col2:
+            st.caption(f"**Color:** {found_pill.get('color', 'N/A')}")
+        with col3:
+            st.caption(f"**NDC:** {found_pill.get('ndc', 'N/A')}")
+        st.caption(f"Confidence: {confidence}% | Imprint: {imprint}")
+
+    elif risk_level == "Low" and found_pill:
         st.success(f"✅ IDENTIFIED: {found_pill['name']}")
         st.info(f"**Status:** Safe to Monitor")
         st.markdown(f"**What to Do:** {found_pill.get('action', 'Monitor at home')}")
