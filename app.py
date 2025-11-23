@@ -159,9 +159,11 @@ if img_file_buffer is not None:
                         risk_level = "HIGH - OPIOID PATTERN - POSSIBLE FENTANYL"
                         break
 
-            # 2. No pill detected / no imprint
-            if imprint == "NONE" or confidence == 0:
+            # 2. No pill detected / no imprint (split into two cases for better messaging)
+            if confidence == 0:
                 risk_level = "HIGH - NO PILL DETECTED"
+            elif imprint == "NONE":
+                risk_level = "HIGH - NO IMPRINT VISIBLE"
 
             # 3. Low confidence (blurry, dark, damaged, screenshot)
             elif confidence < 80:
@@ -269,6 +271,16 @@ if st.session_state.last_result is not None:
             st.markdown("## [1-800-268-9017](tel:18002689017)")
             st.write("If the child is unconscious or having trouble breathing:")
             st.markdown("## 🚨 CALL 911 IMMEDIATELY")
+
+        # Special handling for NO IMPRINT VISIBLE case
+        elif "NO IMPRINT VISIBLE" in risk_level:
+            st.write("**⚠️ Pill Detected - No Imprint Visible**")
+            st.write(f"**Detected:** {detected_shape} pill, {detected_color} color")
+            st.markdown("### Cannot identify without imprint text")
+            st.markdown("## 📞 CALL POISON CONTROL NOW")
+            st.markdown("## [1-800-268-9017](tel:18002689017)")
+            st.info("**Tell them:** Pill has no visible markings or text")
+            st.caption(f"Confidence: {confidence}% | Shape: {detected_shape} | Color: {detected_color}")
 
         # Pill detected with database match
         elif found_pill:
