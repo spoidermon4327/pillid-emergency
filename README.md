@@ -231,7 +231,7 @@ pillid-emergency/
 
 ## Team
 
-- **Kirtirajsinh Atodariya** - [LinkedIn]([https://www.linkedin.com/in/kirtirajsinhatodariya/])
+- **Kirtirajsinh Atodariya** - [LinkedIn][(https://www.linkedin.com/in/kirtirajsinhatodariya/)]
 
 
 ---
